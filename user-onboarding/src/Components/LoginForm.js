@@ -1,10 +1,20 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { withFormik, Form, Field } from 'formik'
 import * as Yup from 'yup'
 import axios from 'axios'
 
 // Adding destructured 'errors' prop to the form. The 'errors' prop gets passed down from the 'withFormik' component.
-function LoginForm({ values, errors, touched }) {
+function LoginForm({ status, errors, touched }) {
+    // set state
+    const [users, setUsers] = useState([])
+
+    // useEffect hook
+    useEffect(() => {
+        if (status) {
+            setUsers([...users, status])
+        }
+    }, [status])
+
     return (
         <Form>
             <div>
@@ -43,6 +53,13 @@ function LoginForm({ values, errors, touched }) {
                 Accept TOS
             </label>
             <button type="submit">Submit Form</button>
+
+            {users.map(user => {
+                return (
+                    <div key={user.name}>Name: {user.name}</div>
+                )
+            })}
+
         </Form> 
     )
 }
@@ -73,7 +90,7 @@ const FormikLoginForm = withFormik({
     // END VALIDATION SCHEMA
 
     // create submit handler 
-    handleSubmit(values, { resetForm, setErrors, setSubmitting }) {
+    handleSubmit(values, { setStatus, resetForm, setErrors, setSubmitting }) {
         console.log(values)
 
         axios
@@ -81,11 +98,12 @@ const FormikLoginForm = withFormik({
             .then(res => {
                 console.log(res)
                 resetForm()
-                setSubmitting(false)
+                setStatus(res.data)
+                // setSubmitting(false)
             })
             .catch(err => {
                 console.log(err)
-                setSubmitting(false)
+                // setSubmitting(false)
             })
     }
 })(LoginForm)
